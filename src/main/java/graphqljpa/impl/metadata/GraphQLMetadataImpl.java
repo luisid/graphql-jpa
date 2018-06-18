@@ -22,7 +22,7 @@ abstract class GraphQLMetadataImpl implements GraphQLMetaData {
     @Override
     public GraphQLBuilder getBuilder() {
         Class<? extends GraphQLBuilder> builderClazz = AnnotationUtils.getBuilder(this);
-        if (builderClazz == null) {
+        if (builderClazz != null) {
             try {
                 return builderClazz.getConstructor().newInstance();
             } catch (NoSuchMethodException ex) {

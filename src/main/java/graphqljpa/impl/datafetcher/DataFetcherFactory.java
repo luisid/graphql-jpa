@@ -8,9 +8,9 @@ public class DataFetcherFactory {
     static public DataFetcher getDataFetcher(GraphQLIdentifiableTypeMetadata metadata) {
         return new DataFetcher() {
             @Override
-            public get(DataFetchingEnvironment environment) {
+            public Object get(DataFetchingEnvironment environment) {
                 return metadata.getJavaType();
             }
-        }
+        };
     }
 }

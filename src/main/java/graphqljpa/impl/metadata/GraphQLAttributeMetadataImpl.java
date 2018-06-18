@@ -16,6 +16,8 @@ import javax.persistence.Entity;
 import javax.persistence.metamodel.*;
 import java.lang.annotation.Annotation;
 
+import static graphql.Scalars.GraphQLString;
+
 class GraphQLAttributeMetadataImpl extends GraphQLMetadataImpl implements GraphQLAttributeMetadata {
     private final Attribute attribute;
     private GraphQLManagedTypeMetadata entityMetadata = null;
@@ -49,18 +51,30 @@ class GraphQLAttributeMetadataImpl extends GraphQLMetadataImpl implements GraphQ
 
         if (isEmbedded()) {
             type = GraphQLTypeReference.typeRef(
-                    GraphQLMetadataFactory.getEmbeddable(attribute.getJavaType().getName()).getName()
+                    GraphQLMetadataFactory.getEmbeddable(attribute.getJavaType().getSimpleName()).getName()
             );
         } else if (isAssociation()) {
-            type = GraphQLTypeReference.typeRef(
-                    GraphQLMetadataFactory.getEntity(attribute.getJavaType().getName()).getName()
-            );
+            if (isCollection()) {
+                type = GraphQLTypeReference.typeRef(
+                        GraphQLMetadataFactory.getEntity(
+                                ((PluralAttribute) attribute).getElementType().getJavaType().getSimpleName()
+                        ).getName()
+                );
+            } else {
+                type = GraphQLTypeReference.typeRef(
+                        GraphQLMetadataFactory.getEntity(attribute.getJavaType().getSimpleName()).getName()
+                );
+            }
         } else if (isElementCollection()) {
-            type = null;
+            type = GraphQLString;
         }
 
         if (isCollection()) {
             type = GraphQLList.list(type);
+        }
+
+        if (type == null) {
+            System.out.print("b");
         }
 
         return type;

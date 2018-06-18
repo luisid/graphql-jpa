@@ -1,7 +1,6 @@
 package graphqljpa.impl;
 
 import graphql.schema.*;
-import graphqljpa.builders.GraphQLField;
 import graphqljpa.impl.metadata.GraphQLMetadataFactory;
 import graphqljpa.schema.GraphQLBuilder;
 import graphqljpa.schema.GraphQLExtension;
@@ -22,6 +21,10 @@ public class GraphQLSchemaBuilderImpl implements GraphQLSchemaBuilder {
     private Set<GraphQLExtension> extensions = new HashSet<>();
     private Set<GraphQLBuilder> builders = new HashSet<>();
     private GraphQLBuilder builder = new DefaultGraphQLBuilder();
+
+    public GraphQLSchemaBuilderImpl(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     @Override
     public GraphQLSchemaBuilder description(String description) {
@@ -82,16 +85,15 @@ public class GraphQLSchemaBuilderImpl implements GraphQLSchemaBuilder {
         allObjectTypes.addAll(rootObjectTypes);
         allObjectTypes.addAll(embeddableTypes);
 
-//        GraphQLObject rootQuery = GraphQLObjectType.newObject()
-//                .description(description)
-//                .name("RootType")
-//                .fields(this.buildRootFields(rootObjectTypes));
-
-        GraphQLObjectType rootType = null;
+        GraphQLObjectType rootQuery = GraphQLObjectType.newObject()
+                .description(description)
+                .name("RootType")
+                .fields(this.buildRootFields(rootObjectTypes))
+                .build();
 
         return GraphQLSchema.newSchema()
                 .additionalTypes(allObjectTypes)
-                .query(rootType)
+                .query(rootQuery)
                 .build();
     }
 
@@ -119,16 +121,6 @@ public class GraphQLSchemaBuilderImpl implements GraphQLSchemaBuilder {
         return metaData.isRoot();
     }
 
-    private GraphQLFieldDefinition buildGraphQLFieldDefinition(GraphQLField graphQLField) {
-        return GraphQLFieldDefinition.newFieldDefinition()
-                .name(graphQLField.getName())
-                .description(graphQLField.getDescription())
-                .deprecate(graphQLField.getDeprecated())
-                //.argument()
-                //.withDirectives()
-                .type(graphQLField.getOutputType())
-                .build();
-    }
 
     private List<GraphQLFieldDefinition> buildRootFields(List<GraphQLObjectType> rootTypes) {
         return rootTypes

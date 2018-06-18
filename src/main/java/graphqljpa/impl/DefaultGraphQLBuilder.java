@@ -2,12 +2,9 @@ package graphqljpa.impl;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
-import graphqljpa.builders.GraphQLField;
-import graphqljpa.builders.GraphQLObject;
 import graphqljpa.schema.*;
 import graphqljpa.schema.metadata.GraphQLAttributeMetadata;
 import graphqljpa.schema.metadata.GraphQLManagedTypeMetadata;
-import graphqljpa.schema.metadata.GraphQLMetaData;
 
 public class DefaultGraphQLBuilder implements GraphQLBuilder {
     @Override

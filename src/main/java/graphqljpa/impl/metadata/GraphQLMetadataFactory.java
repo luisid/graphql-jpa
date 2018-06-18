@@ -54,7 +54,9 @@ public class GraphQLMetadataFactory {
 
         GraphQLEntityTypeMetadataImpl entityMetadata = new GraphQLEntityTypeMetadataImpl(entityType);
 
-        return entityMetadataMap.putIfAbsent(entityType.getName(), entityMetadata);
+        entityMetadataMap.putIfAbsent(entityType.getName(), entityMetadata);
+
+        return entityMetadata;
     }
 
     static public GraphQLMappedSuperclassTypeMetadata getMetaData(MappedSuperclassType mappedSuperclassType) {

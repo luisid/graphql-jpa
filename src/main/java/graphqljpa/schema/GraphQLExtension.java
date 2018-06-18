@@ -1,6 +1,6 @@
 package graphqljpa.schema;
 
-import graphqljpa.builders.GraphQLDirective;
+import graphql.schema.GraphQLDirective;
 import graphqljpa.schema.metadata.GraphQLMetaData;
 
 import java.util.Set;

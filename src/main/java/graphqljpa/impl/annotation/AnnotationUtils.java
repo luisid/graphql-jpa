@@ -25,17 +25,21 @@ public class AnnotationUtils {
 
     static public Boolean isIgnored(GraphQLMetaData metaData) {
         final GraphQLIgnore annotation = (GraphQLIgnore) metaData.getAnnotation(GraphQLIgnore.class);
-        return annotation.value();
+        return annotation != null && annotation.value();
     }
 
     static public Boolean isRoot(GraphQLMetaData metaData) {
         final GraphQLIsRoot annotation = (GraphQLIsRoot) metaData.getAnnotation(GraphQLIsRoot.class);
 
-        return annotation.value();
+        return annotation != null && annotation.value();
     }
 
     static public Class<? extends graphqljpa.schema.GraphQLBuilder> getBuilder(GraphQLMetaData metaData) {
         final GraphQLBuilder annotation = (GraphQLBuilder) metaData.getAnnotation(GraphQLBuilder.class);
+
+        if (annotation == null) {
+            return null;
+        }
 
         return annotation.builder();
     }
@@ -43,13 +47,17 @@ public class AnnotationUtils {
     static public Class<? extends graphqljpa.schema.GraphQLBuilder>[] getBuilders(GraphQLMetaData metaData) {
         final GraphQLBuilder annotation = (GraphQLBuilder) metaData.getAnnotation(GraphQLBuilder.class);
 
+        if (annotation == null) {
+            return new Class[0];
+        }
+
         return annotation.builders();
     }
 
     static public Boolean isExtensible(GraphQLMetaData metaData) {
         final GraphQLExtensible annotation = (GraphQLExtensible) metaData.getAnnotation(GraphQLExtensible.class);
 
-        return annotation.value();
+        return annotation != null && annotation.value();
     }
 
     static public boolean isFilterable(GraphQLAttributeMetadata metadata) {
