@@ -1,6 +1,5 @@
 package model;
 
-import graphql.ExecutionResult;
 import graphql.schema.GraphQLSchema;
 import graphqljpa.impl.GraphQLSchemaBuilderImpl;
 import graphqljpa.schema.GraphQLSchemaBuilder;
@@ -11,16 +10,19 @@ import org.junit.Test;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.metamodel.EntityType;
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertNotNull;
 
 public class SchemaTest {
     private EntityManagerFactory entityManagerFactory;
+    private GraphQLSchema schema;
 
     @Before
     public void init() {
         entityManagerFactory = Persistence.createEntityManagerFactory( "star-wars" );
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+        GraphQLSchemaBuilder builder = new GraphQLSchemaBuilderImpl(entityManager);
+        schema = builder.build();
     }
 
     @After
@@ -29,12 +31,17 @@ public class SchemaTest {
     }
 
     @Test
-    public void schemaCreation() {
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
+    public void schemaHasHumanType() {
+        assertNotNull(schema.getAdditionalTypes().stream().filter(t -> t.getName().equals("Human")).findFirst());
+    }
 
-        GraphQLSchemaBuilder builder = new GraphQLSchemaBuilderImpl(entityManager);
-        GraphQLSchema schema = builder.build();
+    @Test
+    public void schemaHasDroidType() {
+        assertNotNull(schema.getAdditionalTypes().stream().filter(t -> t.getName().equals("Droid")).findFirst());
+    }
 
-        return;
+    @Test
+    public void schemaHasCharacterType() {
+        assertNotNull(schema.getAdditionalTypes().stream().filter(t -> t.getName().equals("Character")).findFirst());
     }
 }

@@ -2,8 +2,6 @@ package graphqljpa.impl.datafetcher;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import graphql.schema.GraphQLArgument;
-import graphqljpa.schema.metadata.GraphQLIdentifiableTypeMetadata;
 import graphqljpa.schema.metadata.GraphQLManagedTypeMetadata;
 
 import javax.persistence.EntityManager;
