@@ -1,11 +1,14 @@
 package graphqljpa.impl.metadata;
 
 import graphqljpa.schema.GraphQLBuilder;
+import graphqljpa.schema.GraphQLExtension;
 import graphqljpa.schema.metadata.GraphQLMetaData;
 import graphqljpa.impl.annotation.AnnotationUtils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 abstract class GraphQLMetadataImpl implements GraphQLMetaData {
@@ -41,12 +44,12 @@ abstract class GraphQLMetadataImpl implements GraphQLMetaData {
 
     @Override
     public Set<GraphQLBuilder> getBuilders() {
-        Class<? extends GraphQLBuilder>[] buildersClazz = AnnotationUtils.getBuilders(this);
+        List<Class<? extends GraphQLBuilder>> buildersClazz = AnnotationUtils.getBuilders(this);
         Set<GraphQLBuilder> builders = new HashSet<>();
 
-        for (int i = 0; i < buildersClazz.length; i++) {
+        for (int i = 0; i < buildersClazz.size(); i++) {
             try {
-                builders.add(buildersClazz[i].getConstructor().newInstance());
+                builders.add(buildersClazz.get(i).getConstructor().newInstance());
             } catch (NoSuchMethodException ex) {
 
             } catch (InstantiationException ex) {
@@ -59,5 +62,27 @@ abstract class GraphQLMetadataImpl implements GraphQLMetaData {
         }
 
         return builders;
+    }
+
+    @Override
+    public List<GraphQLExtension> getExtensions() {
+        List<Class<? extends GraphQLExtension>> extensionsClazz = AnnotationUtils.getExtensions(this);
+        Set<GraphQLExtension> extensions = new HashSet<>();
+
+        for (int i = 0; i < extensionsClazz.size(); i++) {
+            try {
+                extensions.add(extensionsClazz.get(i).getConstructor().newInstance());
+            } catch (NoSuchMethodException ex) {
+
+            } catch (InstantiationException ex) {
+
+            } catch (IllegalAccessException ex) {
+
+            } catch (InvocationTargetException ex) {
+
+            }
+        }
+
+        return new ArrayList<>(extensions);
     }
 }

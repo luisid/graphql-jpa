@@ -1,5 +1,6 @@
 package graphqljpa.impl.metadata;
 
+import graphql.schema.GraphQLObjectType;
 import graphqljpa.schema.metadata.*;
 
 import javax.persistence.metamodel.Attribute;
@@ -48,42 +49,62 @@ public class GraphQLMetadataFactory {
 
 
     static public GraphQLEntityTypeMetadata getMetaData(EntityType entityType) {
-        if (entityMetadataMap.containsKey(entityType.getName())) {
-            return entityMetadataMap.get(entityType.getName());
+        GraphQLEntityTypeMetadataImpl entityMetadata = new GraphQLEntityTypeMetadataImpl(entityType);
+        String name = entityMetadata.getName();
+
+        if (entityMetadataMap.containsKey(name)) {
+            return entityMetadataMap.get(name);
         }
 
-        GraphQLEntityTypeMetadataImpl entityMetadata = new GraphQLEntityTypeMetadataImpl(entityType);
-
-        entityMetadataMap.putIfAbsent(entityType.getName(), entityMetadata);
+        entityMetadataMap.putIfAbsent(name, entityMetadata);
 
         return entityMetadata;
     }
 
     static public GraphQLMappedSuperclassTypeMetadata getMetaData(MappedSuperclassType mappedSuperclassType) {
-        String name = mappedSuperclassType.getJavaType().getName();
+        GraphQLMappedSuperclassTypeMetadataImpl mappedSuperclassMetadata = new GraphQLMappedSuperclassTypeMetadataImpl(mappedSuperclassType);
+        String name = mappedSuperclassMetadata.getName();
 
         if (mappedSuperclassMetadataMap.containsKey(name)) {
             return mappedSuperclassMetadataMap.get(name);
         }
 
-        GraphQLMappedSuperclassTypeMetadataImpl mappedSuperclassMetadata = new GraphQLMappedSuperclassTypeMetadataImpl(mappedSuperclassType);
+        mappedSuperclassMetadataMap.putIfAbsent(name, mappedSuperclassMetadata);
 
-        return mappedSuperclassMetadataMap.putIfAbsent(name, mappedSuperclassMetadata);
+        return mappedSuperclassMetadata;
     }
 
     static public GraphQLEmbeddableTypeMetadata getMetaData(EmbeddableType embeddableType) {
-        String name = embeddableType.getJavaType().getName();
+        GraphQLEmbeddableTypeMetadataImpl embeddableTypeMetadata = new GraphQLEmbeddableTypeMetadataImpl(embeddableType);
+        String name = embeddableTypeMetadata.getName();
 
         if (embeddableMetadataMap.containsKey(name)) {
             return embeddableMetadataMap.get(name);
         }
 
-        GraphQLEmbeddableTypeMetadataImpl embeddableTypeMetadata = new GraphQLEmbeddableTypeMetadataImpl(embeddableType);
+        embeddableMetadataMap.putIfAbsent(name, embeddableTypeMetadata);
 
-        return embeddableMetadataMap.putIfAbsent(name, embeddableTypeMetadata);
+        return embeddableTypeMetadata;
     }
 
     static public GraphQLAttributeMetadata getMetaData(Attribute attribute) {
         return new GraphQLAttributeMetadataImpl(attribute);
+    }
+
+
+    static public GraphQLManagedTypeMetadata getMetadataFromObjectType(GraphQLObjectType objectType) {
+        if (entityMetadataMap.containsKey(objectType.getName())) {
+            return entityMetadataMap.get(objectType.getName());
+        }
+
+        if (embeddableMetadataMap.containsKey(objectType.getName())) {
+            return embeddableMetadataMap.get(objectType.getName());
+        }
+
+        if (mappedSuperclassMetadataMap.containsKey(objectType.getName())) {
+            return mappedSuperclassMetadataMap.get(objectType.getName());
+        }
+
+        return null;
     }
 }

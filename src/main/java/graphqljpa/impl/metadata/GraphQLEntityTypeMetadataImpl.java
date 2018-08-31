@@ -23,4 +23,9 @@ class GraphQLEntityTypeMetadataImpl extends GraphQLIdentifiableTypeMetadataImpl 
 
         return entityType.getName();
     }
+
+    @Override
+    public EntityType<?> getEntityType() {
+        return this.entityType;
+    }
 }

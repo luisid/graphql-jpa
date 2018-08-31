@@ -3,9 +3,6 @@ package model;
 import javax.persistence.*;
 
 @Entity(name = "Human")
-@Table(indexes = {
-        @Index(columnList = "home_planet")
-})
 public class Human extends Character {
 
     @Column(name="home_planet")

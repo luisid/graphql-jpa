@@ -61,4 +61,9 @@ abstract class GraphQLIdentifiableTypeMetadataImpl extends GraphQLManagedTypeMet
     public List<GraphQLAttributeMetadata> getFilterableAttributes() {
         return getAttributes().stream().filter(AnnotationUtils::isFilterable).collect(Collectors.toList());
     }
+
+    @Override
+    public GraphQLAttributeMetadata getId() {
+        return getAttribute(identifiableType.getId(identifiableType.getIdType().getJavaType()).getName());
+    }
 }

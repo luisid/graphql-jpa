@@ -16,10 +16,4 @@ public @interface GraphQLName {
      * @return String
      */
     String value();
-
-    /**
-     * The name used when the field also have a collection variant.
-     * @return String
-     */
-    String collectionName();
 }

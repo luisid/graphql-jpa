@@ -1,8 +1,13 @@
 package graphqljpa.impl.annotation;
 
 import graphqljpa.annotation.*;
+import graphqljpa.schema.GraphQLExtension;
 import graphqljpa.schema.metadata.GraphQLAttributeMetadata;
 import graphqljpa.schema.metadata.GraphQLMetaData;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class AnnotationUtils {
     static public String getName(GraphQLMetaData metaData) {
@@ -15,6 +20,20 @@ public class AnnotationUtils {
         final GraphQLDescription annotation = (GraphQLDescription) metaData.getAnnotation(GraphQLDescription.class);
 
         return annotation != null? annotation.value(): null;
+    }
+
+    static public String getInputDescription(GraphQLMetaData metaData) {
+        final GraphQLDescription annotation = (GraphQLDescription) metaData.getAnnotation(GraphQLDescription.class);
+
+        if (annotation == null) {
+            return null;
+        }
+
+        if (!annotation.input().equals("")) {
+            return annotation.input();
+        }
+
+        return annotation.value();
     }
 
     static public String getDeprecated(GraphQLMetaData metaData) {
@@ -31,7 +50,11 @@ public class AnnotationUtils {
     static public Boolean isRoot(GraphQLMetaData metaData) {
         final GraphQLIsRoot annotation = (GraphQLIsRoot) metaData.getAnnotation(GraphQLIsRoot.class);
 
-        return annotation != null && annotation.value();
+        if (annotation == null) {
+            return true;
+        }
+
+        return annotation.value();
     }
 
     static public Class<? extends graphqljpa.schema.GraphQLBuilder> getBuilder(GraphQLMetaData metaData) {
@@ -44,14 +67,24 @@ public class AnnotationUtils {
         return annotation.builder();
     }
 
-    static public Class<? extends graphqljpa.schema.GraphQLBuilder>[] getBuilders(GraphQLMetaData metaData) {
+    static public List<Class<? extends GraphQLExtension>> getExtensions(GraphQLMetaData metaData) {
+        final GraphQLExtensible annotation = (GraphQLExtensible) metaData.getAnnotation(GraphQLExtensible.class);
+
+        if (annotation == null) {
+            return new ArrayList<>();
+        }
+
+        return  new ArrayList<>(); //Arrays.asList(annotation.extensions()).stream().map(clazz -> clazz.);
+    }
+
+    static public List<Class<? extends graphqljpa.schema.GraphQLBuilder>> getBuilders(GraphQLMetaData metaData) {
         final GraphQLBuilder annotation = (GraphQLBuilder) metaData.getAnnotation(GraphQLBuilder.class);
 
         if (annotation == null) {
-            return new Class[0];
+            return new ArrayList<>();
         }
 
-        return annotation.builders();
+        return Arrays.asList(annotation.builders());
     }
 
     static public Boolean isExtensible(GraphQLMetaData metaData) {

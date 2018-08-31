@@ -11,7 +11,5 @@ import java.lang.annotation.Target;
 @Target( { TYPE, FIELD })
 @Retention(RUNTIME)
 public @interface GraphQLIgnore {
-    boolean value() default false;
-    boolean delegate() default false;
-    Class clazz();
+    boolean value() default true;
 }

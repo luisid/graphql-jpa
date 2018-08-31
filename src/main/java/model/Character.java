@@ -1,6 +1,7 @@
 package model;
 
 import graphqljpa.annotation.GraphQLDescription;
+import graphqljpa.annotation.GraphQLName;
 
 import javax.persistence.*;
 import java.util.List;

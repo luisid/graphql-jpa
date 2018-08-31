@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 abstract class GraphQLManagedTypeMetadataImpl extends GraphQLMetadataImpl implements GraphQLManagedTypeMetadata {
     private final ManagedType managedType;
 
@@ -24,7 +25,13 @@ abstract class GraphQLManagedTypeMetadataImpl extends GraphQLMetadataImpl implem
 
     @Override
     public GraphQLAttributeMetadata getAttribute(String name) {
-        return null;
+        Attribute attribute = managedType.getAttribute(name);
+
+        if (attribute == null) {
+            return null;
+        }
+
+        return GraphQLMetadataFactory.getMetaData(attribute);
     }
 
     @Override
@@ -51,6 +58,11 @@ abstract class GraphQLManagedTypeMetadataImpl extends GraphQLMetadataImpl implem
             return name;
         }
 
+        return managedType.getJavaType().getName();
+    }
+
+    @Override
+    public String getOriginalName() {
         return managedType.getJavaType().getName();
     }
 

@@ -1,12 +1,10 @@
 package graphqljpa.impl.metadata;
 
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLType;
-import graphql.schema.GraphQLTypeReference;
+import graphql.schema.*;
 import graphqljpa.impl.metadata.GraphQLMetadataFactory;
 import graphqljpa.impl.metadata.GraphQLMetadataImpl;
 import graphqljpa.scalars.JavaScalars;
+import graphqljpa.schema.GraphQLExtension;
 import graphqljpa.schema.metadata.GraphQLAttributeMetadata;
 import graphqljpa.schema.metadata.GraphQLManagedTypeMetadata;
 import graphqljpa.schema.metadata.GraphQLMetaData;
@@ -15,7 +13,10 @@ import graphqljpa.impl.annotation.AnnotationUtils;
 import javax.persistence.Entity;
 import javax.persistence.metamodel.*;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.util.List;
 
+import static graphql.Scalars.GraphQLID;
 import static graphql.Scalars.GraphQLString;
 
 class GraphQLAttributeMetadataImpl extends GraphQLMetadataImpl implements GraphQLAttributeMetadata {
@@ -42,12 +43,21 @@ class GraphQLAttributeMetadataImpl extends GraphQLMetadataImpl implements GraphQ
     }
 
     @Override
-    public GraphQLOutputType getType() {
+    public Attribute getAttribute() {
+        return attribute;
+    }
+
+    @Override
+    public GraphQLType getType() {
+        if (attribute instanceof SingularAttribute && ((SingularAttribute) attribute).isId()) {
+            return GraphQLID;
+        }
+
         if (isBasic()) {
             return JavaScalars.of(attribute.getJavaType());
         }
 
-        GraphQLOutputType type = null;
+        GraphQLType type = null;
 
         if (isEmbedded()) {
             type = GraphQLTypeReference.typeRef(
@@ -74,7 +84,7 @@ class GraphQLAttributeMetadataImpl extends GraphQLMetadataImpl implements GraphQ
         }
 
         if (type == null) {
-            System.out.print("b");
+            System.out.print("Error shouldn't happen");
         }
 
         return type;
@@ -82,7 +92,12 @@ class GraphQLAttributeMetadataImpl extends GraphQLMetadataImpl implements GraphQ
 
     @Override
     public Annotation getAnnotation(Class<? extends Annotation> clazz) {
-        return attribute.getJavaType().getAnnotation(clazz);
+        return ((AnnotatedElement) attribute.getJavaMember()).getAnnotation(clazz);
+    }
+
+    @Override
+    public String getOriginalName() {
+        return attribute.getName();
     }
 
     @Override
@@ -98,6 +113,11 @@ class GraphQLAttributeMetadataImpl extends GraphQLMetadataImpl implements GraphQ
     @Override
     public String getDeprecationReason() {
         return AnnotationUtils.getDeprecated(this);
+    }
+
+    @Override
+    public String getArgumentDescription() {
+        return AnnotationUtils.getInputDescription(this);
     }
 
     @Override

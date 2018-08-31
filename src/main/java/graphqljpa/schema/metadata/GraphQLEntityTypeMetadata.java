@@ -1,5 +1,11 @@
 package graphqljpa.schema.metadata;
 
-public interface GraphQLEntityTypeMetadata extends GraphQLIdentifiableTypeMetadata {
+import javax.persistence.metamodel.EntityType;
 
+public interface GraphQLEntityTypeMetadata extends GraphQLIdentifiableTypeMetadata {
+    /**
+     * Obtain the original EntityType instance.
+     * @return EntityType
+     */
+    EntityType<?> getEntityType();
 }

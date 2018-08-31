@@ -12,7 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.UUID;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import graphql.Assert;
 import graphql.Scalars;
 import graphql.language.IntValue;
@@ -30,6 +31,7 @@ import graphql.schema.GraphQLScalarType;
  */
 public class JavaScalars {
     private static HashMap<Class<?>, GraphQLScalarType> scalarsRegistry = new HashMap<>();
+    static final Logger log = LoggerFactory.getLogger(JavaScalars.class);
 
     static {
         scalarsRegistry.put(String.class, Scalars.GraphQLString);
@@ -113,7 +115,7 @@ public class JavaScalars {
             try {
                 return LocalDateTime.parse(input);
             } catch (DateTimeParseException e) {
-                //log.warn("Failed to parse Date from input: " + input, e);
+                log.warn("Failed to parse Date from input: " + input, e);
                 return null;
             }
         }
@@ -158,7 +160,7 @@ public class JavaScalars {
             try {
                 return LocalDate.parse(input);
             } catch (DateTimeParseException e) {
-                //log.warn("Failed to parse Date from input: " + input, e);
+                log.warn("Failed to parse Date from input: " + input, e);
                 return null;
             }
         }
@@ -200,7 +202,7 @@ public class JavaScalars {
             try {
                 return DateFormat.getInstance().parse(input);
             } catch (ParseException e) {
-                //log.warn("Failed to parse Date from input: " + input, e);
+                log.warn("Failed to parse Date from input: " + input, e);
                 return null;
             }
         }
@@ -236,7 +238,7 @@ public class JavaScalars {
             try {
                 return UUID.fromString(input);
             } catch (IllegalArgumentException e) {
-                //log.warn("Failed to parse UUID from input: " + input, e);
+                log.warn("Failed to parse UUID from input: " + input, e);
                 return null;
             }
         }

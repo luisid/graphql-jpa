@@ -1,10 +1,11 @@
 package graphqljpa.impl;
 
+import graphql.GraphQLException;
 import graphql.schema.*;
+import graphqljpa.impl.builders.GraphQLBuilderImpl;
+import graphqljpa.impl.datafetcher.BaseDataFetcher;
 import graphqljpa.impl.metadata.GraphQLMetadataFactory;
-import graphqljpa.schema.GraphQLBuilder;
-import graphqljpa.schema.GraphQLExtension;
-import graphqljpa.schema.GraphQLSchemaBuilder;
+import graphqljpa.schema.*;
 import graphqljpa.schema.metadata.*;
 
 import javax.persistence.EntityManager;
@@ -16,14 +17,28 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class GraphQLSchemaBuilderImpl implements GraphQLSchemaBuilder {
+    static final public String idArgument = "id";
     private String description;
     private EntityManager entityManager;
+    private NamingStrategy namingStrategy = new NamingStrategy() {};
     private Set<GraphQLExtension> extensions = new HashSet<>();
     private Set<GraphQLBuilder> builders = new HashSet<>();
-    private GraphQLBuilder builder = new DefaultGraphQLBuilder();
+    private GraphQLBuilder builder = new GraphQLBuilderImpl();
+    private GraphQLRootObjectBuilder rootObjectBuilder;
+    private GraphQLPagination graphQLPagination = new GraphQLPaginationImpl();
 
     public GraphQLSchemaBuilderImpl(EntityManager entityManager) {
         this.entityManager = entityManager;
+        graphQLPagination = new GraphQLPaginationImpl();
+        graphQLPagination.entityManager(entityManager);
+        rootObjectBuilder = new GraphQLRootObjectBuilder(entityManager, namingStrategy, graphQLPagination);
+    }
+
+    @Override
+    public GraphQLSchemaBuilder namingStrategy(NamingStrategy namingStrategy) {
+        this.namingStrategy = namingStrategy;
+        rootObjectBuilder = new GraphQLRootObjectBuilder(entityManager, namingStrategy, graphQLPagination);
+        return this;
     }
 
     @Override
@@ -84,16 +99,20 @@ public class GraphQLSchemaBuilderImpl implements GraphQLSchemaBuilder {
         allObjectTypes.addAll(objectTypes);
         allObjectTypes.addAll(rootObjectTypes);
         allObjectTypes.addAll(embeddableTypes);
+        allObjectTypes.addAll(graphQLPagination.getTypes());
+
+        List<GraphQLFieldDefinition> fields = rootObjectBuilder.buildRootFields(rootObjectTypes);
 
         GraphQLObjectType rootQuery = GraphQLObjectType.newObject()
                 .description(description)
                 .name("RootType")
-                .fields(this.buildRootFields(rootObjectTypes))
+                .fields(fields)
                 .build();
 
         return GraphQLSchema.newSchema()
                 .additionalTypes(allObjectTypes)
                 .query(rootQuery)
+                //.mutation(null)
                 .build();
     }
 
@@ -119,14 +138,6 @@ public class GraphQLSchemaBuilderImpl implements GraphQLSchemaBuilder {
 
     private Boolean isRoot(GraphQLIdentifiableTypeMetadata metaData) {
         return metaData.isRoot();
-    }
-
-
-    private List<GraphQLFieldDefinition> buildRootFields(List<GraphQLObjectType> rootTypes) {
-        return rootTypes
-                .stream()
-                .map(this::buildRootField)
-                .collect(Collectors.toList());
     }
 
     private GraphQLObjectType buildObjectType(GraphQLManagedTypeMetadata metaData) {
@@ -180,20 +191,23 @@ public class GraphQLSchemaBuilderImpl implements GraphQLSchemaBuilder {
         return objectBuilder.build();
     }
 
-    private List<GraphQLDirective> buildDirectives(GraphQLAttributeMetadata metaData) {
-        return new ArrayList<>();
+    private List<GraphQLExtension> getExtensionsForField(GraphQLAttributeMetadata metaData) {
+        List<GraphQLExtension> extensions = new ArrayList<>(this.extensions);
+        extensions.addAll(metaData.getExtensions());
+        return extensions;
     }
 
-    private List<GraphQLDirective> buildDirectives(GraphQLManagedTypeMetadata metaData) {
-        return new ArrayList<>();
-    }
+    private DataFetcher<?> buildDataFetcher(DataFetcher originalDataFetcher, GraphQLAttributeMetadata metaData, List<GraphQLExtension> extensions) {
+        DataFetcher dataFetcher = (DataFetchingEnvironment environment) -> {
+            for (int i = 0; i < extensions.size(); i++) {
+                if (!extensions.get(i).next(environment, metaData)) {
+                    throw new GraphQLException("Execution interrupted by extension");
+                }
+            }
+            return originalDataFetcher.get(environment);
+        };
 
-    private GraphQLFieldDefinition buildRootField(GraphQLObjectType rootObject) {
-        return GraphQLFieldDefinition.newFieldDefinition()
-                .name(rootObject.getName())
-                .description(rootObject.getDescription())
-                .type(GraphQLTypeReference.typeRef(rootObject.getName()))
-                .build();
+        return dataFetcher;
     }
 
     private GraphQLFieldDefinition buildField(GraphQLAttributeMetadata metaData) {
@@ -213,11 +227,10 @@ public class GraphQLSchemaBuilderImpl implements GraphQLSchemaBuilder {
         fieldDefinition.getArguments().forEach(argument -> fieldBuilder.argument(argument));
         fieldDefinition.getDirectives().forEach(directive -> fieldBuilder.withDirectives(directive));
 
-        List<GraphQLDirective> directives = this.buildDirectives(metaData);
 
-        directives.forEach(directive -> fieldBuilder.withDirectives(directive));
+        List<GraphQLExtension> extensions = this.getExtensionsForField(metaData);
 
-        //TODO Weird logic to combine data fetchers
+        fieldBuilder.dataFetcher(this.buildDataFetcher(fieldDefinition.getDataFetcher(), metaData, extensions));
 
         return fieldBuilder.build();
     }
@@ -230,18 +243,4 @@ public class GraphQLSchemaBuilderImpl implements GraphQLSchemaBuilder {
                 .collect(Collectors.toList());
 
     }
-
-    private void buildInterfaces() {
-
-    }
-//    @Override
-//    public GraphQLSchema build() {
-//        if (queryBuilder == null) {
-//            queryBuilder = new GraphQLQueryBuilderImpl();
-//        }
-//
-//        GraphQLObjectType rootType = queryBuilder.build();
-//
-//        return GraphQLSchema.newSchema().query(rootType).build();
-//    }
 }

@@ -13,6 +13,13 @@ import java.util.Set;
  */
 public interface GraphQLSchemaBuilder {
     /**
+     * Set namingStrategy to be use in the schema creation
+     * @param namingStrategy
+     * @return
+     */
+    GraphQLSchemaBuilder  namingStrategy(NamingStrategy namingStrategy);
+
+    /**
      * Set description for the query root GraphQLObjectType
      * @param description String
      * @return GraphQLSchemaBuilder

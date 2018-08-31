@@ -14,4 +14,10 @@ public interface GraphQLIdentifiableTypeMetadata extends GraphQLManagedTypeMetad
     GraphQLIdentifiableTypeMetadata getSupertype();
     void addSubclass(GraphQLIdentifiableTypeMetadata subclass);
     List<GraphQLAttributeMetadata> getFilterableAttributes();
+
+    /**
+     * Returns the corresponding attibute metadata for the id property.
+     * @return GraphQLAttributeMetadata
+     */
+    GraphQLAttributeMetadata getId();
 }
